@@ -1,4 +1,4 @@
-wwwimport numpy as np
+import numpy as np
 
 
 class KNN:
