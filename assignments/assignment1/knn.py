@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 
 
 class KNN:
@@ -32,7 +33,7 @@ class KNN:
         else:
             dists = self.compute_distances_two_loops(X)
 
-        if self.train_y.dtype == np.bool:
+        if self.train_y.dtype == bool:
             return self.predict_labels_binary(dists)
         else:
             return self.predict_labels_multiclass(dists)
@@ -116,7 +117,7 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        pred = np.zeros(num_test, np.bool)
+        pred = np.zeros(num_test, bool)
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
@@ -139,11 +140,12 @@ class KNN:
         '''
         num_test = dists.shape[0]
         num_test = dists.shape[0]
-        pred = np.zeros(num_test, np.int)
+        pred = np.zeros(num_test, int)
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
             indexes = dists[i].argsort()[:self.k]
-            pred[i] = bool(np.median(self.train_y[indexes]))
+            neighbors = self.train_y[indexes]
+            pred[i] = stats.mode(neighbors)[0][0]
             pass
         return pred
