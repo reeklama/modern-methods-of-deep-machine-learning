@@ -1,6 +1,10 @@
 import numpy as np
 
 
+def _softmax(z):
+    # z -= np.max(z)
+    return np.exp(z - np.max(z)) / (np.sum(np.exp(z - np.max(z))))
+
 def softmax(predictions):
     '''
     Computes probabilities from scores
@@ -13,18 +17,10 @@ def softmax(predictions):
       probs, np array of the same shape as predictions - 
         probability for every class, 0..1
     '''
-    # TODO implement softmax
-    # Your final implementation shouldn't have any loops
-    predict = predictions.copy()
-    predict = predict - np.max(predict)
-    softmax = np.zeros(predict.shape)
-    i = np.nditer(predict, flags=['multi_index'])
-    while not i.finished:
-      mi = i.multi_index
-      softmax[mi] = np.exp(predict[mi])/np.sum(np.exp(predict))
-      i.iternext()
-    return softmax
-    raise Exception("Not implemented!")
+    if len(predictions.shape) == 1:
+        return _softmax(predictions)
+    else:
+        return np.apply_along_axis(_softmax, 1, predictions)
 
 
 def cross_entropy_loss(probs, target_index):
@@ -40,10 +36,16 @@ def cross_entropy_loss(probs, target_index):
     Returns:
       loss: single value
     '''
-    # TODO implement cross-entropy
-    # Your final implementation shouldn't have any loops
-    return (-np.log(probs[target_index]))
-    raise Exception("Not implemented!")
+    y_true = np.zeros(probs.shape)
+    if isinstance(target_index, int):
+        y_true[target_index] = 1
+    else:
+        count = 0
+        for sample_y_true in target_index:
+            y_true[count][sample_y_true] = 1
+            count += 1
+
+    return - np.sum(y_true * np.log(probs))
 
 
 def softmax_with_cross_entropy(predictions, target_index):
@@ -61,22 +63,19 @@ def softmax_with_cross_entropy(predictions, target_index):
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     '''
-    # TODO implement softmax with cross-entropy
-    # Your final implementation shouldn't have any loops
-    y = np.zeros(predictions.shape)
-    print(y)
-    for j in range(predictions.shape[0]):
-      y[j]=1
-    smax = np.zeros(predictions.shape)
-    for j in range(predictions.shape[0]):
-      smax[j] = softmax(predictions[j])
-    loss = np.zeros(target_index.shape)
-    for j in range(target_index.shape[0]):
-      loss[j] = cross_entropy_loss(smax[j], target_index[j])
-    dprediction = np.zeros(predictions.shape)
-    for j in range(predictions.shape[0]):
-      dprediction[j] = softmax[j] - y[j]
-    raise Exception("Not implemented!")
+    y_true = np.zeros(predictions.shape)
+    if isinstance(target_index, int):
+        y_true[target_index] = 1
+    else:
+        count = 0
+        for sample_y_true in target_index:
+            y_true[count][sample_y_true] = 1
+            count += 1
+
+    softmax_prob = softmax(predictions)
+    loss = cross_entropy_loss(softmax_prob, target_index)
+
+    dprediction = softmax_prob - y_true
 
     return loss, dprediction
 
@@ -95,11 +94,10 @@ def l2_regularization(W, reg_strength):
     '''
 
     # TODO: implement l2 regularization and gradient
-    # Your final implementation shouldn't have any loops
     raise Exception("Not implemented!")
 
     return loss, grad
-    
+
 
 def linear_softmax(X, W, target_index):
     '''
@@ -118,9 +116,8 @@ def linear_softmax(X, W, target_index):
     predictions = np.dot(X, W)
 
     # TODO implement prediction and gradient over W
-    # Your final implementation shouldn't have any loops
     raise Exception("Not implemented!")
-    
+
     return loss, dW
 
 
@@ -144,7 +141,7 @@ class LinearSoftmaxClassifier():
 
         num_train = X.shape[0]
         num_features = X.shape[1]
-        num_classes = np.max(y)+1
+        num_classes = np.max(y) + 1
         if self.W is None:
             self.W = 0.001 * np.random.randn(num_features, num_classes)
 
@@ -180,16 +177,6 @@ class LinearSoftmaxClassifier():
         y_pred = np.zeros(X.shape[0], dtype=np.int)
 
         # TODO Implement class prediction
-        # Your final implementation shouldn't have any loops
         raise Exception("Not implemented!")
 
         return y_pred
-
-
-
-                
-                                                          
-
-            
-
-                
